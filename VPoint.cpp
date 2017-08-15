@@ -1,5 +1,5 @@
 #include"VPoint.h"
-float DegreesToRadian(float deg){
+double DegreesToRadian(double deg){
 	return deg*M_PI/180;
 }
 

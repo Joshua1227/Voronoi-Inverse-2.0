@@ -31,7 +31,7 @@ circle::circle(double rad){
 }
 bool circle::IsPointOnCircle(VPoint &p){				// Check whether point is on the circle
 	bool found = false;					
-	float temp;
+	double temp;
 	if (sqrt(pow((center.x-p.x),2) + pow((center.y-p.y),2)) == radius)	//the radius of the circle is thae same as the distance between the center and the point
 		found = true;
 	else if(sqrt(pow((center.x-p.x),2) + pow((center.y-p.y),2)) < radius +1 && sqrt(pow((center.x-p.x),2) + pow((center.y-p.y),2)) > radius - 1)	//  if there is very little distance between the the distance and radius replace the point with the closest point on the circle
