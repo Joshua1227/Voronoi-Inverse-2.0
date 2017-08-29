@@ -21,8 +21,8 @@ line::line(VPoint begin){
 line::line(VPoint begin, double angle){
 	start = begin;
 	direction = angle;
-	std::cout<<"start point of line is ("<<start.x<<", "<<start.y<<")"<<std::endl;
-	std::cout<<"direction of the line is "<<direction<<std::endl;
+	//std::cout<<"start point of line is ("<<start.x<<", "<<start.y<<")"<<std::endl;
+	//std::cout<<"direction of the line is "<<direction<<std::endl;
 }
 
 polar_point line::MirrorPoint(polar_point p){

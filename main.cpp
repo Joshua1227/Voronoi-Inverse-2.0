@@ -4,10 +4,11 @@
 #include <math.h>
 #include <algorithm>
 #include <time.h>
-
+#include <fstream>
 #include "Voronoi.h"
 #include "VPoint.h"
 #include "Circle.h"
+#include "lines.h"
 
 void display (void);
 void onEF (int n);
@@ -17,13 +18,13 @@ vor::Voronoi * v;
 vor::Vertices * ver; // vrcholy
 //vor::Vertices * dir; // smìry, kterými se pohybují
 vor::Edges * edg;	 // hrany diagramu
-VPoint Vertex[5],tempver[10];
+VPoint Vertex[5],tempver[10], last[3], last1[3], last2[3];
 double w = 100;
 
 int main (int argc, char **argv) 
 {
 	using namespace vor;
-
+	VPoint origin(0.0,0.0);
 	v = new Voronoi();
 	ver = new Vertices();
 	//dir = new Vertices();
@@ -101,6 +102,7 @@ int main (int argc, char **argv)
 		}
 	}
 	VEdge edges2[10][3];
+	double direction[10][3];	//NOTE: Change the way we get the direction of the line (use start and end point of the line)
 	for(int i=0,j=0; i<z; i++)
 	{
 		if(Ptemp[i]>2)
@@ -110,17 +112,223 @@ int main (int argc, char **argv)
 			edges2[j][2] = edges1[i][2];
 			Vertex[j].x = temp[i].x;
 			Vertex[j].y = temp[i].y;
+			if(int(Vertex[j].x) == int(edges2[j][0].end->x))
+				direction[j][0] = atan2((edges2[j][0].start->y - edges2[j][0].end->y),(edges2[j][0].start->x - edges2[j][0].end->x))*(180/M_PI);
+			else
+				direction[j][0] = atan2((edges2[j][0].end->y - edges2[j][0].start->y),(edges2[j][0].end->x - edges2[j][0].start->x))*(180/M_PI);
+				
+			if(int(Vertex[j].x) == int(edges2[j][1].end->x))
+				direction[j][1] = atan2((edges2[j][1].start->y - edges2[j][1].end->y),(edges2[j][1].start->x - edges2[j][1].end->x))*(180/M_PI);
+			else
+				direction[j][1] = atan2((edges2[j][1].end->y - edges2[j][1].start->y),(edges2[j][1].end->x - edges2[j][1].start->x))*(180/M_PI);
+				
+			if(int(Vertex[j].x) == int(edges2[j][2].end->x))
+				direction[j][2] = atan2((edges2[j][2].start->y - edges2[j][2].end->y),(edges2[j][2].start->x - edges2[j][2].end->x))*(180/M_PI);
+			else
+				direction[j][2] = atan2((edges2[j][2].end->y - edges2[j][2].start->y),(edges2[j][2].end->x - edges2[j][2].start->x))*(180/M_PI);
+				
 			std::cout<<"Vertex: ( "<<Vertex[j].x<<" , "<<Vertex[j].y<<" ) "<<Ptemp[i]<<std::endl;
-			std::cout<<"start0: ( "<<edges2[j][0].start->x<<" , "<<edges2[j][0].start->y<<" )"<<std::endl;
+			std::cout<<"start0: ( "<<edges2[j][0].start->x<<" , "<<edges2[j][0].start->y<<" ) slope is "<<direction[j][0]<<std::endl;
 			std::cout<<"end0: ( "<<edges2[j][0].end->x<<" , "<<edges2[j][0].end->y<<" )"<<std::endl;
-			std::cout<<"start1: ( "<<edges2[j][1].start->x<<" , "<<edges2[j][1].start->y<<" )"<<std::endl;
+			std::cout<<"start1: ( "<<edges2[j][1].start->x<<" , "<<edges2[j][1].start->y<<" ) slope is "<<direction[j][1]<<std::endl;
 			std::cout<<"end1: ( "<<edges2[j][1].end->x<<" , "<<edges2[j][1].end->y<<" )"<<std::endl;
-			std::cout<<"start2: ( "<<edges2[j][2].start->x<<" , "<<edges2[j][2].start->y<<" )"<<std::endl;
+			std::cout<<"start2: ( "<<edges2[j][2].start->x<<" , "<<edges2[j][2].start->y<<" ) slope is "<<direction[j][2]<<std::endl;
 			std::cout<<"end2: ( "<<edges2[j][2].end->x<<" , "<<edges2[j][2].end->y<<" )"<<std::endl;
 			navi = j;
 			j++;
 		}
 	}
+	navi+=1;
+	for(int w=0;w<navi;w++){
+	std::ofstream outfile;
+	outfile.open("file.txt",std::ios::out | std::ios::trunc);
+	bool found = false;
+	//get slopes  for the lines
+	line A(origin, direction[w][0]);					// define the lines
+	line B(origin, direction[w][1]);
+	line C(origin, direction[w][2]);
+	polar_point P, Q;
+	P.r = 20;
+	P.theta = direction[w][0];
+	Q.r = 20;
+	Q.theta = direction[w][1];
+	while(found == false)						// start seach loop
+	{
+		//NOTE (TO DO) :tarnsform the pint to the origin
+		//cout<<"mirror P start"<<endl;
+		//mirror_P:
+		polar_point P1 = A.MirrorPoint(P);
+		//P1.angle_correction();
+		//bool P1proper;				// make sure P1 is legitimate
+		//if(P1.theta < random_angle1)
+		//	P1proper = true;
+		//else if(P1.theta > (random_angle1 + random_angle2 + random_angle3))
+		//	P1proper = true;
+		//else
+		//	P1proper = false;
+		polar_point P2 = B.MirrorPoint(P);
+		//P2.angle_correction();
+		//bool P2proper;				// make sure P2 is legitimate
+		//if(P2.theta > (random_angle1 + random_angle2) && P2.theta < (random_angle1 + random_angle2 + random_angle3))
+		//	P2proper = true;
+		//else
+		//	P2proper = false;
+		polar_point P12 = C.MirrorPoint(P1);
+		//P12.angle_correction();
+		//bool P12proper;				// make sure P12 is legitimate
+		//if(P12.theta >  (random_angle1 + random_angle2) && P2.theta < (random_angle1 + random_angle2 + random_angle3))
+		//	P12proper = true;
+		//else
+		//	P12proper = false;
+		//if (P12proper == false || P2proper == false)
+		//{
+		//	P.theta += random_angle2/100;
+			//cout<<random_angle1 + random_angle2<<endl;
+			//cout<<random_angle1 + random_angle2 + random_angle3<<endl;
+			//cout<<"goto p1 "<<P12.theta<<" "<<P2.theta<<endl;
+		//	goto mirror_P;
+		//}
+		/*else if (P1proper == false)
+		{
+			cout<<random_angle1<<endl;
+			cout<<random_angle1 + random_angle2 + random_angle3<<endl;
+			P.theta -= random_angle2/100;
+			cout<<"goto p2 "<<P1.theta<<" "<<endl;
+			goto mirror_P;
+		}*/
+		//P.angle_correction();
+		//P1.angle_correction();
+		//P2.angle_correction();
+		//P12.angle_correction();
+		VPoint temp,temp1,temp2,temp12;
+		temp = P.ConvertToCoordinate();
+		temp1 = P1.ConvertToCoordinate();
+		temp2 = P2.ConvertToCoordinate();
+		temp12 = P12.ConvertToCoordinate();
+		//outfile<<setprecision(20)<<"P -> ("<<temp.x<<", "<<temp.y<<") P1 -> ("<<temp1.x<<", "<<temp1.y<<") P2 -> ("<<temp2.x<<", "<<temp2.y<<") P12 -> ("<<temp12.x<<", "<<temp12.y<<")"<<endl;
+		outfile<<"P -> ("<<P.r<<", "<<P.theta<<") P1 -> ("<<P1.r<<", "<<P1.theta<<") P2 -> ("<<P2.r<<", "<<P2.theta<<") P12 -> ("<<P12.r<<", "<<P12.theta<<")"<<std::endl;
+		//cout<<"P finish"<<endl;
+		//KEY AREA//
+		if (P2.theta != P12.theta)			// if P is not the vertex
+		{
+			//cout<<"Q start"<<endl;
+			mirror_Q:
+			polar_point Q1 = A.MirrorPoint(Q);
+			//Q1.angle_correction();
+			//bool Q1proper;				// make sure Q1 is legitimate
+			//if(Q1.theta < random_angle1)
+			//	Q1proper = true;
+			//else if(P1.theta > (random_angle1 + random_angle2 + random_angle3))
+			//	Q1proper = true;
+			//else
+			//	Q1proper = false;
+			polar_point Q2 = B.MirrorPoint(Q);
+			//Q2.angle_correction();
+			//bool Q2proper;				// make sure Q2 is legitimate
+			//if(Q2.theta > (random_angle1 + random_angle2) && Q2.theta < (random_angle1 + random_angle2 + random_angle3))
+			//	Q2proper = true;
+			//else
+			//	Q2proper = false;
+			polar_point Q12 = C.MirrorPoint(Q1);
+			//Q12.angle_correction();
+			//bool Q12proper;				// make sure Q12 is legitimate
+			//if(Q12.theta >  (random_angle1 + random_angle2) && Q2.theta < (random_angle1 + random_angle2 + random_angle3))
+			//	Q12proper = true;
+			//else
+			//	Q12proper = false;
+			//if (Q2proper == false)
+			//{
+				//cout<<random_angle1 + random_angle2<<endl;
+				//cout<<random_angle1 + random_angle2 + random_angle3<<endl;
+			//	Q.theta -= random_angle2/10000;
+				//cout<<"goto q1 "<<Q2.theta<<" "<<endl;
+			//	goto mirror_Q;
+			//}
+			/*else if (Q12proper == false || Q1proper == false)
+			{
+				cout<<random_angle1 + random_angle2<<endl;
+				cout<<random_angle1 + random_angle2 + random_angle3<<endl;
+				cout<<random_angle1<<endl;
+				Q.theta += random_angle2/10000;
+				cout<<"goto q2 "<<Q12.theta<<" "<<Q1.theta<<endl;
+				goto mirror_Q;
+			}*/
+			//Q.angle_correction();
+			//Q1.angle_correction();
+			//Q2.angle_correction();
+			//Q12.angle_correction();
+			VPoint temp,temp1,temp2,temp12;
+			temp = Q.ConvertToCoordinate();
+			temp1 = Q1.ConvertToCoordinate();
+			temp2 = Q2.ConvertToCoordinate();
+			temp12 = Q12.ConvertToCoordinate();
+			//outfile<<setprecision(20)<<"Q -> ("<<temp.x<<", "<<temp.y<<") Q1 -> ("<<temp1.x<<", "<<temp1.y<<") Q2 -> ("<<temp2.x<<", "<<temp2.y<<") Q12 -> ("<<temp12.x<<", "<<temp12.y<<")"<<endl<<endl;
+			outfile<<"Q -> ("<<Q.r<<", "<<Q.theta<<") Q1 -> ("<<Q1.r<<", "<<Q1.theta<<") Q2 -> ("<<Q2.r<<", "<<Q2.theta<<") Q12 -> ("<<Q12.r<<", "<<Q12.theta<<")"<<std::endl;
+			//cout<<"Q finish"<<endl;
+			//KEY AREA//
+			
+			if(Q2.theta != Q12.theta) 		// if Q is not the vertex
+			{
+				polar_point pq;
+				pq.theta = (P.theta + Q.theta)/2;
+				pq.r = P.r;
+				//pq.angle_correction();
+				polar_point pq1 = A.MirrorPoint(pq);
+				//pq1.angle_correction();
+				polar_point pq2 = B.MirrorPoint(pq);
+				//pq2.angle_correction();
+				polar_point pq12 = C.MirrorPoint(pq1);
+				//pq12.angle_correction();
+				outfile<<"PQ -> ("<<pq.r<<", "<<pq.theta<<") PQ1 -> ("<<pq1.r<<", "<<pq1.theta<<") PQ2 -> ("<<pq2.r<<", "<<pq2.theta<<") PQ12 -> ("<<pq12.r<<", "<<pq12.theta<<")"<<std::endl;
+				if(pq.theta == P.theta || pq.theta == Q.theta){
+					std::cout<<"final point reached"<<std::endl;
+					outfile<<"final point reached"<<std::endl;
+					exit(0);
+				}
+				if(pq2.theta > pq12.theta){
+					outfile<<"case 1"<<std::endl;
+					//cout<<"1) "<<P.theta<<endl;
+					//cout<<"1.1) "<<pq.theta<<endl;
+					P.theta = pq.theta;
+					//cout<<"2) "<<P.theta<<endl;
+					//P.angle_correction();
+				//	cout<<"3) "<<P.theta<<endl;
+				}
+				else if(pq2.theta < pq12.theta){
+					outfile<<"case 2"<<std::endl;
+					Q.theta = pq.theta;
+					//Q.angle_correction();
+				}
+				else if(pq2.theta == pq12.theta){
+					outfile<<"case 3"<<std::endl;
+					P.theta = pq.theta;
+					//P.angle_correction();
+				}
+				else{
+					std::cout<<"somethings wrong"<<std::endl;
+					exit(0);
+				}
+			}
+			else
+				{
+					found = true;
+					last[w] = Q.ConvertToCoordinate();
+					last1[w] = Q1.ConvertToCoordinate();
+					last2[w] = Q2.ConvertToCoordinate();
+					outfile.close();
+				}
+		}
+		else
+			{
+				found = true;
+				last[w] = P.ConvertToCoordinate();
+				last1[w] = P1.ConvertToCoordinate();
+				last2[w] = P2.ConvertToCoordinate();
+				outfile.close();
+			}
+	}
+	}
+	std::cout<<navi<<std::endl;
 	//VEdge Edge_connected_to_vertex[10][3];
 	//std::cout<<navi<<std::endl;
 	/*for(int i=0,q=0; i<2; i++)
