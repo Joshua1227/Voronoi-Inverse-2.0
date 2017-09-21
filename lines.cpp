@@ -3,14 +3,6 @@
 #include<iostream>
 #include"VPoint.h"
 
-line::line(){
-	std::cout<<"enter the x coordinate of the start point of the line"<<std::endl;
-	std::cin>>start.x;
-	std::cout<<"enter the y coordinate of the start point of the line"<<std::endl;
-	std::cin>>start.y;
-	std::cout<<"enter the angle at which the line is inclined"<<std::endl;
-	std::cin>>direction;
-}
 
 line::line(VPoint begin){
 	start = begin;

@@ -1,5 +1,5 @@
-#ifndef VEvent_h
-#define VEvent_h
+#ifndef VEVENT_H
+#define VEVENT_H
 
 #include <iostream>
 #include "VPoint.h"

@@ -1,5 +1,5 @@
-#ifndef VEdge_h
-#define VEdge_h
+#ifndef VEDGE_H
+#define VEDGE_H
 
 #include "VPoint.h"
 #include <iostream>

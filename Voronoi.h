@@ -1,5 +1,5 @@
-#ifndef Voronoi_h
-#define Voronoi_h
+#ifndef VORONOI_H
+#define VORONOI_H
 
 #include <list>
 #include <queue>

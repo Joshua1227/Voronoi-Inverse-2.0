@@ -1,5 +1,5 @@
-#ifndef VMATH_H_
-#define VMATH_H_
+#ifndef VMATH_H
+#define VMATH_H
 
 #if defined(WIN32)
 #define INLINE

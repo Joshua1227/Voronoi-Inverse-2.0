@@ -2,10 +2,9 @@
 #include"VPoint.h"
 
 class circle{
-	private:
+	public:
 	double radius; 						//  radius of the circle
 	VPoint center; 						//  center of the circle 
-	public:
 	circle();
 	circle(VPoint p);
 	circle(double rad);					//constructors	

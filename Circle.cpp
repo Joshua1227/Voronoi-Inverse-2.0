@@ -4,14 +4,14 @@
 #include"VPoint.h"
 
 circle::circle(){
-	std::cout<<"enter the x coordinate of the center of the circle"<<std::endl;
+	/*std::cout<<"enter the x coordinate of the center of the circle"<<std::endl;
 	std::cin>>center.x;
 	std::cout<<"enter the y coordinate of the center of the circle"<<std::endl;
 	std::cin>>center.y;
 	std::cout<<"enter the radius of the circle"<<std::endl;
 	std::cin>>radius;
 	std::cout<<"center of the circle is ("<<center.x<<", "<<center.y<<")"<<std::endl;		//for testing
-	std::cout<<"radius of the circle is "<<radius<<std::endl;					//for testing
+	std::cout<<"radius of the circle is "<<radius<<std::endl;					//for testing*/
 }
 
 circle::circle(VPoint p){
