@@ -22,8 +22,39 @@ VPoint Vertex[5],tempver[10], last[3], last1[3], last2[3];
 circle tempc[4];
 double w = 100;
 int navi=0;
-float change_domain(float a){
+
+int orientation_y(VPoint p1, VPoint p2)
+{
+
+    float val = atan2((p2.y - p1.y),(p2.x - p1.x)) * 180/M_PI;
+ 
+    if ((val > 0 && val < 90)||(val < 0 && val > -90)) return 1;  // colinear
+    
+    else if((val > 90 && val <= 180) || (val < -90 && val >= -180)) return -1;
+    
+    else return 0;
+}
+
+int orientation_x(VPoint p1, VPoint p2)
+{
+
+    float val = atan2((p2.y - p1.y),(p2.x - p1.x)) * 180/M_PI;
+ 
+    if (val > 0 && val <= 180) return 1;  // colinear
+    
+    else if(val < 0 && val >= -180 ) return -1;
+    
+    else return 0;
+}
+
+float change_domain_180(float a){
 	if(a < 180.0)
+		return (360.0 + a);
+	else 
+		return a;
+}
+float change_domain_90(float a){
+	if(a < 90.0)
 		return (360.0 + a);
 	else 
 		return a;
@@ -206,6 +237,19 @@ int main (int argc, char **argv)
 				polar_point pq2 = B.MirrorPoint(pq);
 				polar_point pq12 = C.MirrorPoint(pq1);
 				outfile<<"PQ -> ("<<pq.r<<", "<<pq.theta<<") PQ1 -> ("<<pq1.r<<", "<<pq1.theta<<") PQ2 -> ("<<pq2.r<<", "<<pq2.theta<<") PQ12 -> ("<<pq12.r<<", "<<pq12.theta<<")"<<std::endl;
+				
+				if((pq2.theta - pq12.theta < 0.01) && (pq2.theta - pq12.theta > -0.01))
+				{
+					std::cout<<"negligible difference in 2 & 12"<<std::endl;
+					finale[w][0] = pq;
+					finale[w][1] = pq1;
+					finale[w][2] = pq2;
+					found = true;
+					outfile.close();
+					break;
+					
+				}
+				
 				if(pq.theta == P.theta || pq.theta == Q.theta){
 					std::cout<<"final point reached"<<std::endl<<Vertex[w].x<<" , "<<Vertex[w].y<<std::endl;
 					outfile<<"final point reached"<<std::endl;
@@ -226,55 +270,46 @@ int main (int argc, char **argv)
 					outfile.close();
 					break;
 				}
-				if(((P12.theta <= 90.0) && (P2.theta >= 180.0)) || ((Q12.theta >= 180.0)  && (Q2.theta <= 90.0)))
-				{
-					if(signbit(change_domain(pq2.theta) - change_domain(pq12.theta)) == signbit(change_domain(Q2.theta) - change_domain(Q12.theta))){ 
-	// this condition is when the sign of the difference between 2 and 12 for pq is the same as Q
-						outfile<<"case 1.1"<<std::endl;
-						Q.theta = pq.theta;
-					}
-					else if(signbit(change_domain(pq2.theta) - change_domain(pq12.theta)) == signbit(change_domain(P2.theta) - change_domain(P12.theta))){ 
-	// this condition is when the sign of the difference between 2 and 12 for pq is the same as P
-						outfile<<"case 2.1"<<std::endl;
-						P.theta = pq.theta;
-					}
-					else{
-						std::cout<<"somethings wrong"<<std::endl<<Vertex[w].x<<" , "<<Vertex[w].y<<std::endl;
-						exit(0);
-					}
-				}
-				else{
-					if(signbit(pq2.theta - pq12.theta) == signbit(P2.theta - P12.theta)){
-	// this condition is when the sign of the difference between 2 and 12 for pq is the same as P
-					outfile<<"case 1"<<std::endl;
-					P.theta = pq.theta;
-					}
-					else if(signbit(pq2.theta - pq12.theta) == signbit(Q2.theta - Q12.theta)){
-	// this condition is when the sign of the difference between 2 and 12 for pq is the same as Q
-					outfile<<"case 2"<<std::endl;
-					Q.theta = pq.theta;
-					}
-					else{
-					std::cout<<"somethings wrong"<<std::endl<<Vertex[w].x<<" , "<<Vertex[w].y<<std::endl;
-					exit(0);
-					}
-				}
-				/*if(pq2.theta > pq12.theta){
+				
+				/*cout<<"the orientation wrt y of P is "<<orientation_y(P2.ConvertToCoordinate(),P12.ConvertToCoordinate())<<endl;
+				cout<<"the orientation wrt y of Q is "<<orientation_y(Q2.ConvertToCoordinate(),Q12.ConvertToCoordinate())<<endl;
+				cout<<"the orientation wrt y of PQ is "<<orientation_y(pq2.ConvertToCoordinate(),pq12.ConvertToCoordinate())<<endl;
+				cout<<"the orientation wrt x of P is "<<orientation_x(P2.ConvertToCoordinate(),P12.ConvertToCoordinate())<<endl;
+				cout<<"the orientation wrt x of Q is "<<orientation_x(Q2.ConvertToCoordinate(),Q12.ConvertToCoordinate())<<endl;
+				cout<<"the orientation wrt x of PQ is "<<orientation_x(pq2.ConvertToCoordinate(),pq12.ConvertToCoordinate())<<endl;*/
+				if(orientation_y(Q2.ConvertToCoordinate(),Q12.ConvertToCoordinate()) != orientation_y(P2.ConvertToCoordinate(),P12.ConvertToCoordinate())){
+				if(  orientation_y(pq2.ConvertToCoordinate(),pq12.ConvertToCoordinate()) == orientation_y(P2.ConvertToCoordinate(),P12.ConvertToCoordinate())){
+				// this condition is when the sign of the difference between 2 and 12 for pq is the same as P
 					outfile<<"case 1"<<std::endl;
 					P.theta = pq.theta;
 				}
-				else if(pq2.theta < pq12.theta){
+				else if(orientation_y(pq2.ConvertToCoordinate(),pq12.ConvertToCoordinate()) == orientation_y(Q2.ConvertToCoordinate(),Q12.ConvertToCoordinate())){
+				// this condition is when the sign of the difference between 2 and 12 for pq is the same as Q
 					outfile<<"case 2"<<std::endl;
 					Q.theta = pq.theta;
-				}
-				else if(pq2.theta == pq12.theta){
-					outfile<<"case 3"<<std::endl;
-					P.theta = pq.theta;
 				}
 				else{
 					std::cout<<"somethings wrong"<<std::endl;
-					exit(0);
-				}*/
+					//exit(0);
+				}
+				}
+				else{
+				if(  orientation_x(pq2.ConvertToCoordinate(),pq12.ConvertToCoordinate()) == orientation_x(P2.ConvertToCoordinate(),P12.ConvertToCoordinate())){
+				// this condition is when the sign of the difference between 2 and 12 for pq is the same as P
+					outfile<<"case 1"<<std::endl;
+					P.theta = pq.theta;
+				}
+				else if(orientation_x(pq2.ConvertToCoordinate(),pq12.ConvertToCoordinate()) == orientation_x(Q2.ConvertToCoordinate(),Q12.ConvertToCoordinate())){
+				// this condition is when the sign of the difference between 2 and 12 for pq is the same as Q
+					outfile<<"case 2"<<std::endl;
+					Q.theta = pq.theta;
+				}
+				else{
+					std::cout<<"somethings wrong"<<std::endl;
+					//exit(0);
+				}
+				}
+				
 			}
 			else
 				{
