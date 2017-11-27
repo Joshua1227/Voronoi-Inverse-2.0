@@ -174,7 +174,7 @@ int main (int argc, char **argv)
 				direction[j][1] += 360.0;
 			if(direction[j][2] < 0.0)
 				direction[j][2] += 360.0;
-			/*	
+				
 			std::cout<<"Vertex: ( "<<Vertex[j].x<<" , "<<Vertex[j].y<<" ) "<<Ptemp[i]<<std::endl;
 			std::cout<<"start0: ( "<<edges2[j][0].start->x<<" , "<<edges2[j][0].start->y<<" ) slope is "<<direction[j][0]<<std::endl;
 			std::cout<<"end0: ( "<<edges2[j][0].end->x<<" , "<<edges2[j][0].end->y<<" )"<<std::endl;
@@ -182,7 +182,7 @@ int main (int argc, char **argv)
 			std::cout<<"end1: ( "<<edges2[j][1].end->x<<" , "<<edges2[j][1].end->y<<" )"<<std::endl;
 			std::cout<<"start2: ( "<<edges2[j][2].start->x<<" , "<<edges2[j][2].start->y<<" ) slope is "<<direction[j][2]<<std::endl;
 			std::cout<<"end2: ( "<<edges2[j][2].end->x<<" , "<<edges2[j][2].end->y<<" )"<<std::endl;
-			*/
+			
 			navi = j;
 			j++;
 		}
@@ -214,7 +214,7 @@ int main (int argc, char **argv)
 		temp1 = P1.ConvertToCoordinate();
 		temp2 = P2.ConvertToCoordinate();
 		temp12 = P12.ConvertToCoordinate();
-		outfile<<"P -> ("<<P.r<<", "<<P.theta<<") P1 -> ("<<P1.r<<", "<<P1.theta<<") P2 -> ("<<P2.r<<", "<<P2.theta<<") P12 -> ("<<P12.r<<", "<<P12.theta<<")"<<std::endl;
+		//outfile<<"P -> ("<<P.r<<", "<<P.theta<<") P1 -> ("<<P1.r<<", "<<P1.theta<<") P2 -> ("<<P2.r<<", "<<P2.theta<<") P12 -> ("<<P12.r<<", "<<P12.theta<<")"<<std::endl;
 		//KEY AREA//
 		if (P2.theta != P12.theta)			// if P is not the vertex
 		{
@@ -227,18 +227,23 @@ int main (int argc, char **argv)
 			temp1 = Q1.ConvertToCoordinate();
 			temp2 = Q2.ConvertToCoordinate();
 			temp12 = Q12.ConvertToCoordinate();
-			outfile<<"Q -> ("<<Q.r<<", "<<Q.theta<<") Q1 -> ("<<Q1.r<<", "<<Q1.theta<<") Q2 -> ("<<Q2.r<<", "<<Q2.theta<<") Q12 -> ("<<Q12.r<<", "<<Q12.theta<<")"<<std::endl;
+			//outfile<<"Q -> ("<<Q.r<<", "<<Q.theta<<") Q1 -> ("<<Q1.r<<", "<<Q1.theta<<") Q2 -> ("<<Q2.r<<", "<<Q2.theta<<") Q12 -> ("<<Q12.r<<", "<<Q12.theta<<")"<<std::endl;
 			//KEY AREA//
 			
 			if((Q2.theta - Q12.theta) != 0.0) 		// if Q is not the vertex
 			{
 				polar_point pq;
-				pq.theta = (P.theta + Q.theta)/2;
+				if((P.theta - Q.theta > 180) || (Q.theta - P.theta > 180))
+					pq.theta = (P.theta + Q.theta)/2 - 180;
+				else
+					pq.theta = (P.theta + Q.theta)/2;
+				if(pq.theta < 0)
+					pq.theta += 360;
 				pq.r = P.r;
 				polar_point pq1 = A.MirrorPoint(pq);
 				polar_point pq2 = B.MirrorPoint(pq);
 				polar_point pq12 = C.MirrorPoint(pq1);
-				outfile<<"PQ -> ("<<pq.r<<", "<<pq.theta<<") PQ1 -> ("<<pq1.r<<", "<<pq1.theta<<") PQ2 -> ("<<pq2.r<<", "<<pq2.theta<<") PQ12 -> ("<<pq12.r<<", "<<pq12.theta<<")"<<std::endl;
+				//outfile<<"PQ -> ("<<pq.r<<", "<<pq.theta<<") PQ1 -> ("<<pq1.r<<", "<<pq1.theta<<") PQ2 -> ("<<pq2.r<<", "<<pq2.theta<<") PQ12 -> ("<<pq12.r<<", "<<pq12.theta<<")"<<std::endl;
 				
 				if((pq2.theta - pq12.theta < 0.01) && (pq2.theta - pq12.theta > -0.01))
 				{
@@ -254,7 +259,7 @@ int main (int argc, char **argv)
 				
 				if(pq.theta == P.theta || pq.theta == Q.theta){
 					std::cout<<"final point reached"<<std::endl<<Vertex[w].x<<" , "<<Vertex[w].y<<std::endl;
-					outfile<<"final point reached"<<std::endl;
+					//outfile<<"final point reached"<<std::endl;
 					finale[w][0] = P;
 					finale[w][1] = P1;
 					finale[w][2] = P2;
@@ -265,12 +270,12 @@ int main (int argc, char **argv)
 				if(orientation_y(Q2.ConvertToCoordinate(),Q12.ConvertToCoordinate()) != orientation_y(P2.ConvertToCoordinate(),P12.ConvertToCoordinate())){
 				if(  orientation_y(pq2.ConvertToCoordinate(),pq12.ConvertToCoordinate()) == orientation_y(P2.ConvertToCoordinate(),P12.ConvertToCoordinate())){
 				// this condition is when the sign of the difference between 2 and 12 for pq is the same as P
-					outfile<<"case 1"<<std::endl;
+					//outfile<<"case 1"<<std::endl;
 					P.theta = pq.theta;
 				}
 				else if(orientation_y(pq2.ConvertToCoordinate(),pq12.ConvertToCoordinate()) == orientation_y(Q2.ConvertToCoordinate(),Q12.ConvertToCoordinate())){
 				// this condition is when the sign of the difference between 2 and 12 for pq is the same as Q
-					outfile<<"case 2"<<std::endl;
+					//outfile<<"case 2"<<std::endl;
 					Q.theta = pq.theta;
 				}
 				else{
@@ -281,12 +286,12 @@ int main (int argc, char **argv)
 				else{
 				if(  orientation_x(pq2.ConvertToCoordinate(),pq12.ConvertToCoordinate()) == orientation_x(P2.ConvertToCoordinate(),P12.ConvertToCoordinate())){
 				// this condition is when the sign of the difference between 2 and 12 for pq is the same as P
-					outfile<<"case 1"<<std::endl;
+					//outfile<<"case 1"<<std::endl;
 					P.theta = pq.theta;
 				}
 				else if(orientation_x(pq2.ConvertToCoordinate(),pq12.ConvertToCoordinate()) == orientation_x(Q2.ConvertToCoordinate(),Q12.ConvertToCoordinate())){
 				// this condition is when the sign of the difference between 2 and 12 for pq is the same as Q
-					outfile<<"case 2"<<std::endl;
+					//outfile<<"case 2"<<std::endl;
 					Q.theta = pq.theta;
 				}
 				else{
@@ -324,12 +329,12 @@ int main (int argc, char **argv)
 	 		if(Vertex[i+j].x == edges2[i][o].start->x){
 	 			double tempa[3];
 	 			double tempb[3];
-	 			std::cout<<"case I\n";
+	 			//std::cout<<"case I\n";
 	 			for(int z=0;z<3;z++){
 	 				tempa[z] = finale[i][z].theta;
 	 				tempb[z] = finale[i+j][z].theta;
-	 				std::cout<<"a "<<finale[i][z].theta<<std::endl;
-	 				std::cout<<"b "<<finale[i+j][z].theta<<std::endl;
+	 			//	std::cout<<"a "<<finale[i][z].theta<<std::endl;
+	 			//	std::cout<<"b "<<finale[i+j][z].theta<<std::endl;
 	 			}
 	 			//std::sort(tempa,tempa + 3*sizeof(tempa[0]));
 	 			//std::sort(tempb,tempb + 3*sizeof(tempb[0]));
@@ -531,6 +536,8 @@ int main (int argc, char **argv)
 	for(int i=0;i<navi;i++)
 	for(int j=0;j<3;j++)
 		Khatam[i][j] = finale[i][j].ConvertToCoordinate();
+	for(vor::Vertices::iterator i = ver->begin(); i!= ver->end(); ++i)
+	std::cout<<"the  vpoints are "<<(*i)->x<<" "<<(*i)->y<<"\n";
 	/*for(int j=0;j<navi;j++)
 	for(vor::Vertices::iterator i = ver->begin(); i!= ver->end(); ++i)
 	{
