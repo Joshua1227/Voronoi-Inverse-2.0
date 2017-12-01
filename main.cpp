@@ -19,10 +19,10 @@ vor::Voronoi * v;
 vor::Vertices * ver; // vrcholy
 //vor::Vertices * dir; // smìry, kterými se pohybují
 vor::Edges * edg;	 // hrany diagramu
-VPoint Vertex[8],tempver[10], last[3], last1[3], last2[3], Khatam[8][3];
-polar_point finale[8][3];
-circle tempc[4];
-double w = 100;
+VPoint Vertex[20],tempver[20], last[20], last1[20], last2[20], Khatam[20][3];
+polar_point finale[20][3];
+circle tempc[20];
+double w = 1000;
 int navi=0;
 
 int orientation_y(VPoint p1, VPoint p2)
@@ -71,8 +71,8 @@ int main (int argc, char **argv)
 	//dir = new Vertices();
 
 	srand ( time(NULL) );
-
-	for(int i=0; i<4; i++) 
+	// Set max value of i for number of voronoi points
+	for(int i=0; i<10; i++) 
 	{
 
 		ver->push_back(new VPoint( w * (double)rand()/(double)RAND_MAX , w * (double)rand()/(double)RAND_MAX )); 
@@ -96,7 +96,7 @@ int main (int argc, char **argv)
 		}	
 	}
 	int k=0;
-	VEdge edges[15],edges1[10][3];
+	VEdge edges[60],edges1[20][3];
 	for(vor::Edges::iterator i = edg->begin(); i!= edg->end(); ++i,k++)
 	{
 		tempver[navi].x = (*i)->start->x;
@@ -109,8 +109,8 @@ int main (int argc, char **argv)
 		navi++;
 		edges[k] = **i;
 	}
-	VPoint temp[10];
-	int Ptemp[10] = {0,0,0,0,0,0,0,0,0,0};
+	VPoint temp[20];
+	int Ptemp[20] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 	int z=0;
 	for(int i=0,j; i<navi; ++i)
 	{
@@ -142,8 +142,8 @@ int main (int argc, char **argv)
 			z++;
 		}
 	}
-	VEdge edges2[10][3];
-	double direction[10][3];	
+	VEdge edges2[20][3];
+	double direction[20][3];	
 	for(int i=0,j=0; i<z; i++)
 	{
 		if(Ptemp[i]>2)
@@ -190,8 +190,8 @@ int main (int argc, char **argv)
 	navi+=1;
 	
 	for(int w=0;w<navi;w++){
-	std::ofstream outfile;
-	outfile.open("file.txt",std::ios::out | std::ios::trunc);
+	//std::ofstream outfile;
+	//outfile.open("file.txt",std::ios::out | std::ios::trunc);
 	bool found = false;
 	//get slopes  for the lines
 	line A(origin, direction[w][0]);					// define the lines
@@ -252,7 +252,7 @@ int main (int argc, char **argv)
 					finale[w][1] = pq1;
 					finale[w][2] = pq2;
 					found = true;
-					outfile.close();
+					//outfile.close();
 					break;
 					
 				}
@@ -263,7 +263,7 @@ int main (int argc, char **argv)
 					finale[w][0] = P;
 					finale[w][1] = P1;
 					finale[w][2] = P2;
-					outfile.close();
+					//outfile.close();
 					break;
 				}
 				
@@ -307,7 +307,7 @@ int main (int argc, char **argv)
 					finale[w][0] = Q;
 					finale[w][1] = Q1;
 					finale[w][2] = Q2;
-					outfile.close();
+					//outfile.close();
 				}
 		}
 		else
@@ -316,28 +316,31 @@ int main (int argc, char **argv)
 				finale[w][0] = P;
 				finale[w][1] = P1;
 				finale[w][2] = P2;
-				outfile.close();
+				//outfile.close();
 			}
 	}
 	}
-	//Code will be entered here
+
 	std::cout<<navi<<std::endl;
-	for(int i=0;i<navi-1;i++){
-		for(int j=1;i+j<navi;j++){
+	for(int i=0;i<navi;i++){
+		bool found = false;
+		for(int j=0;j<navi;j++){
+			if (j==i) continue;
 			double tempA, tempB, angle;
 			for(int o=0;o<3;o++){
-	 		if(Vertex[i+j].x == edges2[i][o].start->x){
+	 		if(Vertex[j].x == edges2[i][o].start->x){
+	 			found = true;
+	 			std::cout<<"the i is "<<Vertex[i].x<<" "<<Vertex[i].y<<"\n";
+	 			std::cout<<"the j is "<<Vertex[j].x<<" "<<Vertex[j].y<<"\n";
 	 			double tempa[3];
 	 			double tempb[3];
-	 			//std::cout<<"case I\n";
+	 			std::cout<<"case I\n";
 	 			for(int z=0;z<3;z++){
 	 				tempa[z] = finale[i][z].theta;
-	 				tempb[z] = finale[i+j][z].theta;
-	 			//	std::cout<<"a "<<finale[i][z].theta<<std::endl;
-	 			//	std::cout<<"b "<<finale[i+j][z].theta<<std::endl;
+	 				tempb[z] = finale[j][z].theta;
+	 				std::cout<<"a "<<finale[i][z].theta<<std::endl;
+	 				std::cout<<"b "<<finale[j][z].theta<<std::endl;
 	 			}
-	 			//std::sort(tempa,tempa + 3*sizeof(tempa[0]));
-	 			//std::sort(tempb,tempb + 3*sizeof(tempb[0]));
 	 			// Sorting tempa
 	 			for(int k=0;k<3;k++){
 	 				double tempo;
@@ -376,9 +379,10 @@ int main (int argc, char **argv)
 	 					tempb[1] = tempo;
 	 				}
 	 			}
-	 			//std::cout<<"tempa are: "<<tempa[0]<<"  "<<tempa[1]<<"  "<<tempa[2]<<std::endl;
-	 			//std::cout<<"tempb are: "<<tempb[0]<<"  "<<tempb[1]<<"  "<<tempb[2]<<std::endl;
+	 			std::cout<<"tempa are: "<<tempa[0]<<"  "<<tempa[1]<<"  "<<tempa[2]<<std::endl;
+	 			std::cout<<"tempb are: "<<tempb[0]<<"  "<<tempb[1]<<"  "<<tempb[2]<<std::endl;
 	 			angle = atan2((edges2[i][o].start->y - edges2[i][o].end->y),(edges2[i][o].start->x - edges2[i][o].end->x))*(180/M_PI);
+	 			std::cout<<"angle is "<<angle<<"\n";
 	 			if(angle < 0) angle += 360;
 	 			for(int w=0;w<3;w++){
 	 				if(tempa[w] > angle){
@@ -404,21 +408,24 @@ int main (int argc, char **argv)
 	 						break;
 	 					}
 	 				}
-	 				if(x == 2 && tempb[x] < angle){
+	 				if(x == 2 && tempb[x] < angle1){
 	 					tempB = tempb[2];
 	 					break;
 	 				}
 	 			}
 	 		}
-	 		else if((Vertex[i+j].x == edges2[i][o].end->x)){
+	 		else if((Vertex[j].x == edges2[i][o].end->x)){
+	 			found = true;
+	 			std::cout<<"the i is "<<Vertex[i].x<<" "<<Vertex[i].y<<"\n";
+	 			std::cout<<"the j is "<<Vertex[j].x<<" "<<Vertex[j].y<<"\n";
 	 			double tempa[3];
 	 			double tempb[3];
-	 			//std::cout<<"case II\n";
+	 			std::cout<<"case II\n";
 	 			for(int z=0;z<3;z++){
 	 				tempa[z] = finale[i][z].theta;
-	 				tempb[z] = finale[i+j][z].theta;
-	 				//std::cout<<"a "<<finale[i][z].theta<<std::endl;
-	 				//std::cout<<"b "<<finale[i+j][z].theta<<std::endl;
+	 				tempb[z] = finale[j][z].theta;
+	 				std::cout<<"a "<<finale[i][z].theta<<std::endl;
+	 				std::cout<<"b "<<finale[j][z].theta<<std::endl;
 	 				//std::cout<<"ta "<<tempa[z]<<std::endl;
 	 				//std::cout<<"tb "<<tempb[z]<<std::endl;
 	 			}
@@ -462,9 +469,10 @@ int main (int argc, char **argv)
 	 					tempb[1] = tempo;
 	 				}
 	 			}
-	 			//std::cout<<"tempa are: "<<tempa[0]<<"  "<<tempa[1]<<"  "<<tempa[2]<<std::endl;
-	 			//std::cout<<"tempb are: "<<tempb[0]<<"  "<<tempb[1]<<"  "<<tempb[2]<<std::endl;
+	 			std::cout<<"tempa are: "<<tempa[0]<<"  "<<tempa[1]<<"  "<<tempa[2]<<std::endl;
+	 			std::cout<<"tempb are: "<<tempb[0]<<"  "<<tempb[1]<<"  "<<tempb[2]<<std::endl;
 	 			angle = atan2((edges2[i][o].end->y - edges2[i][o].start->y),(edges2[i][o].end->x - edges2[i][o].start->x))*(180/M_PI);
+	 			std::cout<<"angle is "<<angle<<"\n";
 	 			if(angle < 0) angle += 360;
 	 			for(int w=0;w<3;w++){
 	 				if(tempa[w] > angle){
@@ -498,21 +506,23 @@ int main (int argc, char **argv)
 	 		}
 	 		else continue;
 	 		}
+	 		if(found == true){
+	 			// This code uses y=mx+c to find the intersections
 		 		
 		 		float mA,mB,cA,cB;
 		 		mA = tan(tempA*(M_PI/180));
 		 		mB = tan(tempB*(M_PI/180));
-		 		//std::cout<<"temp A is "<<tempA<<"\n";
-		 		//std::cout<<"temp B is "<<tempB<<"\n";
+		 		std::cout<<"temp A is "<<tempA<<"\n";
+		 		std::cout<<"temp B is "<<tempB<<"\n";
 		 		cA = Vertex[i].y - mA*Vertex[i].x;
-		 		cB = Vertex[i+j].y - mB*Vertex[i+j].x;
+		 		cB = Vertex[j].y - mB*Vertex[j].x;
 		 		float x = (cB-cA)/(mA-mB);
 		 		float y = mA*x + cA;
-		 		/*std::cout<<"the x is "<<x<<" The y is "<<y<<std::endl;
+		 		std::cout<<"the x is "<<x<<" The y is "<<y<<std::endl;
 		 		std::cout<<"equation 1 is :\n";
 		 		std::cout<<"y = "<<mA<<" x + "<<cA<<std::endl;
 		 		std::cout<<"equation 2 is :\n";
-		 		std::cout<<"y = "<<mB<<" x + "<<cB<<std::endl;*/
+		 		std::cout<<"y = "<<mB<<" x + "<<cB<<std::endl;
 		 		float r = sqrt(((x-Vertex[i].x)*(x-Vertex[i].x)) + ((y-Vertex[i].y)*(y-Vertex[i].y)));
 		 		for(int y=0;y<3;y++){
 		 			//std::cout<<"before:"<<finale[i][y].r<<std::endl;
@@ -521,15 +531,36 @@ int main (int argc, char **argv)
 		 			//std::cout<<"distance: "<<r<<std::endl;
 		 			//std::cout<<r<<"";
 		 		}
-		 		r = sqrt(((x-Vertex[i+j].x)*(x-Vertex[i+j].x)) + ((y-Vertex[i+j].y)*(y-Vertex[i+j].y)));
+		 		r = sqrt(((x-Vertex[j].x)*(x-Vertex[j].x)) + ((y-Vertex[j].y)*(y-Vertex[j].y)));
 		 		for(int y=0;y<3;y++){
 		 			//std::cout<<"before:"<<finale[i+j][y].r<<std::endl;
-		 			finale[i+j][y].r = r;
+		 			finale[j][y].r = r;
 		 			//std::cout<<"after:"<<finale[i+j][y].r<<std::endl;
 		 			//std::cout<<"distance: "<<r<<std::endl;
 		 			//std::cout<<r<<"\n";
 		 		}
-	 		
+		 		
+			//This code uses x = r*cos(theta), y = r*sin(theta) to find the intersection
+				/*
+				double cosa,cosb,sina,sinb, r, xs1, xs2, tagnt1, tagnt2;
+				cosa = cos(tempA*(M_PI/180));
+				cosb = cos(tempB*(M_PI/180));
+	 			sina = sin(tempA*(M_PI/180));
+	 			sinb = sin(tempB*(M_PI/180));
+	 			xs1 = Vertex[i].x*sinb;
+	 			xs2 = Vertex[i+j].x*sina;
+	 			tagnt1 = tan(tempA*(M_PI/180));
+	 			tagnt2 = tan(tempB*(M_PI/180));
+	 			r=(Vertex[i+j].y - Vertex[i].y + xs1 - xs2)*(tagnt1/(tagnt1-tagnt2));
+	 			for(int y=0;y<3;y++)
+	 				finale[i][y].r = r;
+	 			r = (Vertex[i].x - Vertex[i+j].x + r*cosa)/cosb;
+	 			for(int y=0;y<3;y++)
+	 				finale[i+j][y].r = r;
+	 			*/
+	 			break;
+	 			
+	 		}
 	 	}
 	}
 	
@@ -591,22 +622,25 @@ void drawVoronoi()
 		glEnd();
 		
 	}
+	//To draw a circle 
+	/*
 	for(int j=0; j<navi; j++){	
+		glColor3f(1.0, 0.5, 0.0);
 		glBegin(GL_POINTS);
  		for(int i=0;i<1000;++i)
   		{
   			glVertex3f(-1+2*(Vertex[j].x/w + finale[j][0].r*cos(2*3.14159*i/1000.0)/w), -1+2*(Vertex[j].y/w + finale[j][0].r*sin(2*3.14159*i/1000.0)/w),0);
  		}
  		glEnd();
-	}
-	glColor3f(1.0, 1.0, 0.0);
+	}*/
+	glColor3f(0.0, 1.0, 0.3);
 	for(int j=0; j<navi; j++){
 		for(int i=0; i<3;i++){
 			glBegin(GL_QUADS);
-			glVertex2f( -1+2*(Vertex[j].x/w + Khatam[j][i].x/w) -0.005,  -1+2*(Vertex[j].y/w + Khatam[j][i].y/w) - 0.005);
-			glVertex2f( -1+2*(Vertex[j].x/w + Khatam[j][i].x/w) +0.005,  -1+2*(Vertex[j].y/w + Khatam[j][i].y/w) - 0.005);
-			glVertex2f( -1+2*(Vertex[j].x/w + Khatam[j][i].x/w) +0.005,  -1+2*(Vertex[j].y/w + Khatam[j][i].y/w) + 0.005);
-			glVertex2f( -1+2*(Vertex[j].x/w + Khatam[j][i].x/w) -0.005,  -1+2*(Vertex[j].y/w + Khatam[j][i].y/w) + 0.005);
+			glVertex2f( -1+2*(Vertex[j].x/w + Khatam[j][i].x/w) -0.008,  -1+2*(Vertex[j].y/w + Khatam[j][i].y/w) - 0.008);
+			glVertex2f( -1+2*(Vertex[j].x/w + Khatam[j][i].x/w) +0.008,  -1+2*(Vertex[j].y/w + Khatam[j][i].y/w) - 0.008);
+			glVertex2f( -1+2*(Vertex[j].x/w + Khatam[j][i].x/w) +0.008,  -1+2*(Vertex[j].y/w + Khatam[j][i].y/w) + 0.008);
+			glVertex2f( -1+2*(Vertex[j].x/w + Khatam[j][i].x/w) -0.008,  -1+2*(Vertex[j].y/w + Khatam[j][i].y/w) + 0.008);
 			glEnd();
 		}
 	}
