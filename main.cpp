@@ -82,7 +82,7 @@ int main (int argc, char **argv)
 
 	srand ( time(NULL) );
 	// Set max value of i for number of voronoi points
-	for(int i=0; i<=100; i++) 
+	for(int i=0; i<=1000000; i++) 
 	{
 
 		ver->push_back(new VPoint( w * (double)rand()/(double)RAND_MAX , w * (double)rand()/(double)RAND_MAX )); 
