@@ -5,7 +5,6 @@
 #include <algorithm>
 #include <time.h>
 #include <fstream>
-#include <bits/stdc++.h>
 #include "Voronoi.h"
 #include "VPoint.h"
 #include "Circle.h"
@@ -19,12 +18,15 @@ vor::Voronoi * v;
 vor::Vertices * ver; // vrcholy
 //vor::Vertices * dir; // smìry, kterými se pohybují
 vor::Edges * edg;	 // hrany diagramu
-VPoint Vertex[20],tempver[20], last[20], last1[20], last2[20], Khatam[20][3];
-polar_point finale[20][3];
-circle tempc[20];
-double w = 1000;
-int navi=0;
-
+VPoint Vertex[2000000],tempver[2000000], Khatam[2000000][3];
+polar_point finale[2000000][3];
+double w = 100000;
+unsigned long int navi=0;
+VEdge edges[6000000],edges1[2000000][3];
+VPoint temp[2000000];
+int Ptemp[2000000];
+VEdge edges2[2000000][3];
+double direction[2000000][3];
 int orientation_y(VPoint p1, VPoint p2)
 {
 
@@ -61,9 +63,17 @@ float change_domain_90(float a){
 	else 
 		return a;
 }
-
+//int num_of_vpoints = 100;
 int main (int argc, char **argv) 
 {
+	int num_of_vpoints;
+	std::ofstream outfile;
+	outfile.open("time_taken.csv",std::ios::out | std::ios::app);
+	outfile<<"Number_of_VPoints , Number_of_intersections , Initial_Time , Algorithm_Time , Total_Time\n";
+	//std::cin>>num_of_vpoints;
+	//for(num_of_vpoints = 500; num_of_vpoints<=200000; num_of_vpoints+=500){
+	//std::cout<<"num_of_vpoints = "<<num_of_vpoints<<"\n";
+	clock_t t1, t2, t3;
 	using namespace vor;
 	VPoint origin(0.0,0.0);
 	v = new Voronoi();
@@ -72,7 +82,7 @@ int main (int argc, char **argv)
 
 	srand ( time(NULL) );
 	// Set max value of i for number of voronoi points
-	for(int i=0; i<10; i++) 
+	for(int i=0; i<=1000000; i++) 
 	{
 
 		ver->push_back(new VPoint( w * (double)rand()/(double)RAND_MAX , w * (double)rand()/(double)RAND_MAX )); 
@@ -95,8 +105,10 @@ int main (int argc, char **argv)
 			continue;
 		}	
 	}
+	t1 = clock();
 	int k=0;
-	VEdge edges[60],edges1[20][3];
+	//VEdge edges[6000000],edges1[200][3];
+	std::cout<<"edges begin \n";
 	for(vor::Edges::iterator i = edg->begin(); i!= edg->end(); ++i,k++)
 	{
 		tempver[navi].x = (*i)->start->x;
@@ -109,9 +121,15 @@ int main (int argc, char **argv)
 		navi++;
 		edges[k] = **i;
 	}
-	VPoint temp[20];
-	int Ptemp[20] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+	std::cout<<"edges end \n";
+	//VPoint temp[200];
+	//int Ptemp[200];
+	std::cout<<"initializing temp values\n";
+	for(int i=0;i<2000000;i++)
+		Ptemp[i]=0;
+	std::cout<<"done\n";
 	int z=0;
+	std::cout<<"Ptemp begin\n";
 	for(int i=0,j; i<navi; ++i)
 	{
 		bool ispresent = false;
@@ -142,8 +160,10 @@ int main (int argc, char **argv)
 			z++;
 		}
 	}
-	VEdge edges2[20][3];
-	double direction[20][3];	
+	std::cout<<"Ptemp ends\n";
+	//VEdge edges2[200][3];
+	//double direction[200][3];
+	std::cout<<"Final edges, direction begins\n";	
 	for(int i=0,j=0; i<z; i++)
 	{
 		if(Ptemp[i]>2)
@@ -174,7 +194,7 @@ int main (int argc, char **argv)
 				direction[j][1] += 360.0;
 			if(direction[j][2] < 0.0)
 				direction[j][2] += 360.0;
-				
+			/*	
 			std::cout<<"Vertex: ( "<<Vertex[j].x<<" , "<<Vertex[j].y<<" ) "<<Ptemp[i]<<std::endl;
 			std::cout<<"start0: ( "<<edges2[j][0].start->x<<" , "<<edges2[j][0].start->y<<" ) slope is "<<direction[j][0]<<std::endl;
 			std::cout<<"end0: ( "<<edges2[j][0].end->x<<" , "<<edges2[j][0].end->y<<" )"<<std::endl;
@@ -182,13 +202,15 @@ int main (int argc, char **argv)
 			std::cout<<"end1: ( "<<edges2[j][1].end->x<<" , "<<edges2[j][1].end->y<<" )"<<std::endl;
 			std::cout<<"start2: ( "<<edges2[j][2].start->x<<" , "<<edges2[j][2].start->y<<" ) slope is "<<direction[j][2]<<std::endl;
 			std::cout<<"end2: ( "<<edges2[j][2].end->x<<" , "<<edges2[j][2].end->y<<" )"<<std::endl;
-			
+			*/
 			navi = j;
 			j++;
 		}
 	}
+	std::cout<<"ends\n";
 	navi+=1;
-	
+	t2 = clock();
+	std::cout<<"3 point starts\n";
 	for(int w=0;w<navi;w++){
 	//std::ofstream outfile;
 	//outfile.open("file.txt",std::ios::out | std::ios::trunc);
@@ -247,7 +269,7 @@ int main (int argc, char **argv)
 				
 				if((pq2.theta - pq12.theta < 0.01) && (pq2.theta - pq12.theta > -0.01))
 				{
-					std::cout<<"negligible difference in 2 & 12"<<std::endl;
+					//std::cout<<"negligible difference in 2 & 12"<<std::endl;
 					finale[w][0] = pq;
 					finale[w][1] = pq1;
 					finale[w][2] = pq2;
@@ -320,7 +342,8 @@ int main (int argc, char **argv)
 			}
 	}
 	}
-
+	std::cout<<"ends\n";
+	std::cout<<"4 point starts\n";
 	std::cout<<navi<<std::endl;
 	for(int i=0;i<navi;i++){
 		bool found = false;
@@ -330,16 +353,16 @@ int main (int argc, char **argv)
 			for(int o=0;o<3;o++){
 	 		if(Vertex[j].x == edges2[i][o].start->x){
 	 			found = true;
-	 			std::cout<<"the i is "<<Vertex[i].x<<" "<<Vertex[i].y<<"\n";
-	 			std::cout<<"the j is "<<Vertex[j].x<<" "<<Vertex[j].y<<"\n";
+	 			//std::cout<<"the i is "<<Vertex[i].x<<" "<<Vertex[i].y<<"\n";
+	 			//std::cout<<"the j is "<<Vertex[j].x<<" "<<Vertex[j].y<<"\n";
 	 			double tempa[3];
 	 			double tempb[3];
-	 			std::cout<<"case I\n";
+	 			//std::cout<<"case I\n";
 	 			for(int z=0;z<3;z++){
 	 				tempa[z] = finale[i][z].theta;
 	 				tempb[z] = finale[j][z].theta;
-	 				std::cout<<"a "<<finale[i][z].theta<<std::endl;
-	 				std::cout<<"b "<<finale[j][z].theta<<std::endl;
+	 				//std::cout<<"a "<<finale[i][z].theta<<std::endl;
+	 				//std::cout<<"b "<<finale[j][z].theta<<std::endl;
 	 			}
 	 			// Sorting tempa
 	 			for(int k=0;k<3;k++){
@@ -379,10 +402,10 @@ int main (int argc, char **argv)
 	 					tempb[1] = tempo;
 	 				}
 	 			}
-	 			std::cout<<"tempa are: "<<tempa[0]<<"  "<<tempa[1]<<"  "<<tempa[2]<<std::endl;
-	 			std::cout<<"tempb are: "<<tempb[0]<<"  "<<tempb[1]<<"  "<<tempb[2]<<std::endl;
+	 			//std::cout<<"tempa are: "<<tempa[0]<<"  "<<tempa[1]<<"  "<<tempa[2]<<std::endl;
+	 			//std::cout<<"tempb are: "<<tempb[0]<<"  "<<tempb[1]<<"  "<<tempb[2]<<std::endl;
 	 			angle = atan2((edges2[i][o].start->y - edges2[i][o].end->y),(edges2[i][o].start->x - edges2[i][o].end->x))*(180/M_PI);
-	 			std::cout<<"angle is "<<angle<<"\n";
+	 			//std::cout<<"angle is "<<angle<<"\n";
 	 			if(angle < 0) angle += 360;
 	 			for(int w=0;w<3;w++){
 	 				if(tempa[w] > angle){
@@ -416,21 +439,19 @@ int main (int argc, char **argv)
 	 		}
 	 		else if((Vertex[j].x == edges2[i][o].end->x)){
 	 			found = true;
-	 			std::cout<<"the i is "<<Vertex[i].x<<" "<<Vertex[i].y<<"\n";
-	 			std::cout<<"the j is "<<Vertex[j].x<<" "<<Vertex[j].y<<"\n";
+	 			//std::cout<<"the i is "<<Vertex[i].x<<" "<<Vertex[i].y<<"\n";
+	 			//std::cout<<"the j is "<<Vertex[j].x<<" "<<Vertex[j].y<<"\n";
 	 			double tempa[3];
 	 			double tempb[3];
-	 			std::cout<<"case II\n";
+	 			//std::cout<<"case II\n";
 	 			for(int z=0;z<3;z++){
 	 				tempa[z] = finale[i][z].theta;
 	 				tempb[z] = finale[j][z].theta;
-	 				std::cout<<"a "<<finale[i][z].theta<<std::endl;
-	 				std::cout<<"b "<<finale[j][z].theta<<std::endl;
+	 				//std::cout<<"a "<<finale[i][z].theta<<std::endl;
+	 				//std::cout<<"b "<<finale[j][z].theta<<std::endl;
 	 				//std::cout<<"ta "<<tempa[z]<<std::endl;
 	 				//std::cout<<"tb "<<tempb[z]<<std::endl;
 	 			}
-	 			//std::sort(tempa,tempa + 3*sizeof(tempa[0]));
-	 			//std::sort(tempb,tempb + 3*sizeof(tempa[0]));
 	 			// Sorting tempa
 	 			for(int k=0;k<3;k++){
 	 				double tempo;
@@ -469,10 +490,10 @@ int main (int argc, char **argv)
 	 					tempb[1] = tempo;
 	 				}
 	 			}
-	 			std::cout<<"tempa are: "<<tempa[0]<<"  "<<tempa[1]<<"  "<<tempa[2]<<std::endl;
-	 			std::cout<<"tempb are: "<<tempb[0]<<"  "<<tempb[1]<<"  "<<tempb[2]<<std::endl;
+	 			//std::cout<<"tempa are: "<<tempa[0]<<"  "<<tempa[1]<<"  "<<tempa[2]<<std::endl;
+	 			//std::cout<<"tempb are: "<<tempb[0]<<"  "<<tempb[1]<<"  "<<tempb[2]<<std::endl;
 	 			angle = atan2((edges2[i][o].end->y - edges2[i][o].start->y),(edges2[i][o].end->x - edges2[i][o].start->x))*(180/M_PI);
-	 			std::cout<<"angle is "<<angle<<"\n";
+	 			//std::cout<<"angle is "<<angle<<"\n";
 	 			if(angle < 0) angle += 360;
 	 			for(int w=0;w<3;w++){
 	 				if(tempa[w] > angle){
@@ -512,17 +533,17 @@ int main (int argc, char **argv)
 		 		float mA,mB,cA,cB;
 		 		mA = tan(tempA*(M_PI/180));
 		 		mB = tan(tempB*(M_PI/180));
-		 		std::cout<<"temp A is "<<tempA<<"\n";
-		 		std::cout<<"temp B is "<<tempB<<"\n";
+		 		//std::cout<<"temp A is "<<tempA<<"\n";
+		 		//std::cout<<"temp B is "<<tempB<<"\n";
 		 		cA = Vertex[i].y - mA*Vertex[i].x;
 		 		cB = Vertex[j].y - mB*Vertex[j].x;
 		 		float x = (cB-cA)/(mA-mB);
 		 		float y = mA*x + cA;
-		 		std::cout<<"the x is "<<x<<" The y is "<<y<<std::endl;
-		 		std::cout<<"equation 1 is :\n";
-		 		std::cout<<"y = "<<mA<<" x + "<<cA<<std::endl;
-		 		std::cout<<"equation 2 is :\n";
-		 		std::cout<<"y = "<<mB<<" x + "<<cB<<std::endl;
+		 		//std::cout<<"the x is "<<x<<" The y is "<<y<<std::endl;
+		 		//std::cout<<"equation 1 is :\n";
+		 		//std::cout<<"y = "<<mA<<" x + "<<cA<<std::endl;
+		 		//std::cout<<"equation 2 is :\n";
+		 		//std::cout<<"y = "<<mB<<" x + "<<cB<<std::endl;
 		 		float r = sqrt(((x-Vertex[i].x)*(x-Vertex[i].x)) + ((y-Vertex[i].y)*(y-Vertex[i].y)));
 		 		for(int y=0;y<3;y++){
 		 			//std::cout<<"before:"<<finale[i][y].r<<std::endl;
@@ -563,12 +584,13 @@ int main (int argc, char **argv)
 	 		}
 	 	}
 	}
-	
+	std::cout<<"ends\n";
 	for(int i=0;i<navi;i++)
 	for(int j=0;j<3;j++)
 		Khatam[i][j] = finale[i][j].ConvertToCoordinate();
-	for(vor::Vertices::iterator i = ver->begin(); i!= ver->end(); ++i)
-	std::cout<<"the  vpoints are "<<(*i)->x<<" "<<(*i)->y<<"\n";
+	std::cout<<"Done!!!\n";
+	//for(vor::Vertices::iterator i = ver->begin(); i!= ver->end(); ++i)
+	//std::cout<<"the  vpoints are "<<(*i)->x<<" "<<(*i)->y<<"\n";
 	/*for(int j=0;j<navi;j++)
 	for(vor::Vertices::iterator i = ver->begin(); i!= ver->end(); ++i)
 	{
@@ -580,9 +602,20 @@ int main (int argc, char **argv)
 		}
 		//std::cout<<"distance is: "<<sqrt(((Vertex[j].x-(*i)->x)*(Vertex[j].x-(*i)->x))+((Vertex[j].y-(*i)->y)*(Vertex[j].y-(*i)->y)))<<std::endl;
 	}*/
-	glutInit(&argc, argv); // Initialize GLUT
+	t3 = clock();
+	float time1 = ((float)t2-(float)t1);
+	float time2 = ((float)t3-(float)t2);
+	float time3 = ((float)t3-(float)t1);
+	time1 = time1 / CLOCKS_PER_SEC;
+	time2 = time2 / CLOCKS_PER_SEC;
+	time3 = time3 / CLOCKS_PER_SEC;
+	//std::cout<<"time for intializeng the graph information is: "<<time1<<"\n";
+	//std::cout<<"time for performing the algorithm is: "<<time2<<"\n";
+	//std::cout<<"Overall time taken is: "<<time3<<"\n";
+	outfile<<num_of_vpoints<<" , "<<navi<<" , "<<time1<<" , "<<time2<<" , "<<time3<<"\n";
+	/*glutInit(&argc, argv); // Initialize GLUT
 	glutInitDisplayMode (GLUT_SINGLE); // Set up a basic display buffer (only single buffered for now)
-	glutInitWindowSize (600, 600); // Set the width and height of the window
+	glutInitWindowSize (700, 700); // Set the width and height of the window
 	glutInitWindowPosition (100, 100); // Set the position of the window
 	glutCreateWindow ("You're first OpenGL Window"); // Set the title for the window
 	
@@ -596,10 +629,12 @@ int main (int argc, char **argv)
 	//glutKeyboardUpFunc(keyUp); // Tell GLUT to use the method "keyUp" for key up events
 
 	glutMainLoop(); // Enter GLUT's main loop
-	
+	*/
 	return 0;
+//}
+outfile.close();
 }
-
+/*
 void drawVoronoi()
 {
 	
@@ -621,7 +656,7 @@ void drawVoronoi()
 		glVertex2f( -1+2*(*i)->end->x/w, -1+2*(*i)->end->y/w);
 		glEnd();
 		
-	}
+	}*/
 	//To draw a circle 
 	/*
 	for(int j=0; j<navi; j++){	
@@ -633,6 +668,7 @@ void drawVoronoi()
  		}
  		glEnd();
 	}*/
+	/*
 	glColor3f(0.0, 1.0, 0.3);
 	for(int j=0; j<navi; j++){
 		for(int i=0; i<3;i++){
@@ -643,9 +679,9 @@ void drawVoronoi()
 			glVertex2f( -1+2*(Vertex[j].x/w + Khatam[j][i].x/w) -0.008,  -1+2*(Vertex[j].y/w + Khatam[j][i].y/w) + 0.008);
 			glEnd();
 		}
-	}
+	}*/
 	// The  following segment is to see whether the directions found intersect
-	glColor3f(1.0, 0.0, 0.0);
+	/*glColor3f(1.0, 0.0, 0.0);
 	for(int j=0; j<navi; j++){
 		for(int i=0; i<3; i++){
 			polar_point temp = finale[j][i];
@@ -656,7 +692,8 @@ void drawVoronoi()
 			glVertex2f( -1+2*(Vertex[j].x + tEmp.x)/w, -1+2*(Vertex[j].y + tEmp.y)/w);
 			glEnd();
 		}
-	}
+	}*/
+	/*
 	glColor3f(0, 0, 0);
 	
 }
@@ -691,4 +728,4 @@ void reshape (int width, int height)
 	glLoadIdentity(); // Reset the projection matrix to the identity matrix so that we don't get any artifacts (cleaning up)
 	gluPerspective(22.5, (GLfloat)width / (GLfloat)height, 1.0, 100.0); // Set the Field of view angle (in degrees), the aspect ratio of our window, and the new and far planes
 	glMatrixMode(GL_MODELVIEW); // Switch back to the model view matrix, so that we can start drawing shapes correctly
-}
+}*/
