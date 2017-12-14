@@ -1,5 +1,5 @@
-#include <GL/glew.h> // Include the GLEW header file
-#include <GL/glut.h> // Include the GLUT header file
+//#include <GL/glew.h> // Include the GLEW header file
+//#include <GL/glut.h> // Include the GLUT header file
 #include <iostream>
 #include <math.h>
 #include <algorithm>
@@ -82,7 +82,7 @@ int main (int argc, char **argv)
 
 	srand ( time(NULL) );
 	// Set max value of i for number of voronoi points
-	for(int i=0; i<=1000000; i++) 
+	for(int i=0; i<=100; i++) 
 	{
 
 		ver->push_back(new VPoint( w * (double)rand()/(double)RAND_MAX , w * (double)rand()/(double)RAND_MAX )); 
