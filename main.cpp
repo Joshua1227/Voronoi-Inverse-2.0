@@ -1,10 +1,11 @@
-//#include <GL/glew.h> // Include the GLEW header file
-//#include <GL/glut.h> // Include the GLUT header file
+#include <GL/glew.h> // Include the GLEW header file
+#include <GL/glut.h> // Include the GLUT header file
 #include <iostream>
 #include <math.h>
 #include <algorithm>
 #include <time.h>
 #include <fstream>
+#include <bits/stdc++.h>
 #include "Voronoi.h"
 #include "VPoint.h"
 #include "Circle.h"
@@ -20,7 +21,7 @@ vor::Vertices * ver; // vrcholy
 vor::Edges * edg;	 // hrany diagramu
 VPoint Vertex[2000000],tempver[2000000], Khatam[2000000][3];
 polar_point finale[2000000][3];
-double w = 100000;
+double w = 1000;
 unsigned long int navi=0;
 VEdge edges[6000000],edges1[2000000][3];
 VPoint temp[2000000];
@@ -63,26 +64,22 @@ float change_domain_90(float a){
 	else 
 		return a;
 }
-//int num_of_vpoints = 100;
+
 int main (int argc, char **argv) 
 {
-	int num_of_vpoints;
-	std::ofstream outfile;
-	outfile.open("time_taken.csv",std::ios::out | std::ios::app);
-	outfile<<"Number_of_VPoints , Number_of_intersections , Initial_Time , Algorithm_Time , Total_Time\n";
-	//std::cin>>num_of_vpoints;
-	//for(num_of_vpoints = 500; num_of_vpoints<=200000; num_of_vpoints+=500){
-	//std::cout<<"num_of_vpoints = "<<num_of_vpoints<<"\n";
-	clock_t t1, t2, t3;
 	using namespace vor;
 	VPoint origin(0.0,0.0);
 	v = new Voronoi();
 	ver = new Vertices();
 	//dir = new Vertices();
-
+	int num_of_vpoints;
+	std::cin>>num_of_vpoints;
+	clock_t t1, t2, t3;
+	std::ofstream outfile;
+	outfile.open("time_taken(0).csv",std::ios::out | std::ios::app);
 	srand ( time(NULL) );
 	// Set max value of i for number of voronoi points
-	for(int i=0; i<=1000000; i++) 
+	for(int i=0; i<num_of_vpoints; i++) 
 	{
 
 		ver->push_back(new VPoint( w * (double)rand()/(double)RAND_MAX , w * (double)rand()/(double)RAND_MAX )); 
@@ -162,8 +159,8 @@ int main (int argc, char **argv)
 	}
 	std::cout<<"Ptemp ends\n";
 	//VEdge edges2[200][3];
-	//double direction[200][3];
-	std::cout<<"Final edges, direction begins\n";	
+	//double direction[200][3];	
+	std::cout<<"Final edges, direction begins\n";
 	for(int i=0,j=0; i<z; i++)
 	{
 		if(Ptemp[i]>2)
@@ -280,7 +277,7 @@ int main (int argc, char **argv)
 				}
 				
 				if(pq.theta == P.theta || pq.theta == Q.theta){
-					std::cout<<"final point reached"<<std::endl<<Vertex[w].x<<" , "<<Vertex[w].y<<std::endl;
+					//std::cout<<"final point reached"<<std::endl<<Vertex[w].x<<" , "<<Vertex[w].y<<std::endl;
 					//outfile<<"final point reached"<<std::endl;
 					finale[w][0] = P;
 					finale[w][1] = P1;
@@ -345,7 +342,14 @@ int main (int argc, char **argv)
 	std::cout<<"ends\n";
 	std::cout<<"4 point starts\n";
 	std::cout<<navi<<std::endl;
+	bool find[200000];
+	//Initializing bool values
+	for(int i=0;i<navi;i++)
+		find[i]=false;
+	//running code
 	for(int i=0;i<navi;i++){
+		if(find[i] == true)
+			continue;
 		bool found = false;
 		for(int j=0;j<navi;j++){
 			if (j==i) continue;
@@ -548,6 +552,7 @@ int main (int argc, char **argv)
 		 		for(int y=0;y<3;y++){
 		 			//std::cout<<"before:"<<finale[i][y].r<<std::endl;
 		 			finale[i][y].r = r;
+		 			find[i] = true;
 		 			//std::cout<<"after:"<<finale[i][y].r<<std::endl;
 		 			//std::cout<<"distance: "<<r<<std::endl;
 		 			//std::cout<<r<<"";
@@ -556,39 +561,23 @@ int main (int argc, char **argv)
 		 		for(int y=0;y<3;y++){
 		 			//std::cout<<"before:"<<finale[i+j][y].r<<std::endl;
 		 			finale[j][y].r = r;
+		 			find[j] = true;
 		 			//std::cout<<"after:"<<finale[i+j][y].r<<std::endl;
 		 			//std::cout<<"distance: "<<r<<std::endl;
 		 			//std::cout<<r<<"\n";
 		 		}
 		 		
-			//This code uses x = r*cos(theta), y = r*sin(theta) to find the intersection
-				/*
-				double cosa,cosb,sina,sinb, r, xs1, xs2, tagnt1, tagnt2;
-				cosa = cos(tempA*(M_PI/180));
-				cosb = cos(tempB*(M_PI/180));
-	 			sina = sin(tempA*(M_PI/180));
-	 			sinb = sin(tempB*(M_PI/180));
-	 			xs1 = Vertex[i].x*sinb;
-	 			xs2 = Vertex[i+j].x*sina;
-	 			tagnt1 = tan(tempA*(M_PI/180));
-	 			tagnt2 = tan(tempB*(M_PI/180));
-	 			r=(Vertex[i+j].y - Vertex[i].y + xs1 - xs2)*(tagnt1/(tagnt1-tagnt2));
-	 			for(int y=0;y<3;y++)
-	 				finale[i][y].r = r;
-	 			r = (Vertex[i].x - Vertex[i+j].x + r*cosa)/cosb;
-	 			for(int y=0;y<3;y++)
-	 				finale[i+j][y].r = r;
-	 			*/
 	 			break;
 	 			
 	 		}
 	 	}
 	}
 	std::cout<<"ends\n";
+	
+	
 	for(int i=0;i<navi;i++)
 	for(int j=0;j<3;j++)
 		Khatam[i][j] = finale[i][j].ConvertToCoordinate();
-	std::cout<<"Done!!!\n";
 	//for(vor::Vertices::iterator i = ver->begin(); i!= ver->end(); ++i)
 	//std::cout<<"the  vpoints are "<<(*i)->x<<" "<<(*i)->y<<"\n";
 	/*for(int j=0;j<navi;j++)
@@ -609,32 +598,30 @@ int main (int argc, char **argv)
 	time1 = time1 / CLOCKS_PER_SEC;
 	time2 = time2 / CLOCKS_PER_SEC;
 	time3 = time3 / CLOCKS_PER_SEC;
-	//std::cout<<"time for intializeng the graph information is: "<<time1<<"\n";
-	//std::cout<<"time for performing the algorithm is: "<<time2<<"\n";
-	//std::cout<<"Overall time taken is: "<<time3<<"\n";
-	outfile<<num_of_vpoints<<" , "<<navi<<" , "<<time1<<" , "<<time2<<" , "<<time3<<"\n";
-	/*glutInit(&argc, argv); // Initialize GLUT
+	//outfile<<num_of_vpoints<<" , "<<navi<<" , "<<time1<<" , "<<time2<<" , "<<time3<<"\n";
+	std::cout<<"time for intializeng the graph information is: "<<time1<<"\n";
+	std::cout<<"time for performing the algorithm is: "<<time2<<"\n";
+	std::cout<<"Overall time taken is: "<<time3<<"\n";
+	glutInit(&argc, argv); // Initialize GLUT
 	glutInitDisplayMode (GLUT_SINGLE); // Set up a basic display buffer (only single buffered for now)
 	glutInitWindowSize (700, 700); // Set the width and height of the window
 	glutInitWindowPosition (100, 100); // Set the position of the window
 	glutCreateWindow ("You're first OpenGL Window"); // Set the title for the window
 	
-	//glutTimerFunc(100, onEF, 0);
+	glutTimerFunc(100, onEF, 0);
 	onEF(5);
 	glutDisplayFunc(display); // Tell GLUT to use the method "display" for rendering
 
 	glutReshapeFunc(reshape); // Tell GLUT to use the method "reshape" for reshaping
 
-	//glutKeyboardFunc(keyPressed); // Tell GLUT to use the method "keyPressed" for key presses
-	//glutKeyboardUpFunc(keyUp); // Tell GLUT to use the method "keyUp" for key up events
+	glutKeyboardFunc(keyPressed); // Tell GLUT to use the method "keyPressed" for key presses
+	glutKeyboardUpFunc(keyUp); // Tell GLUT to use the method "keyUp" for key up events
 
 	glutMainLoop(); // Enter GLUT's main loop
-	*/
+	outfile.close();
 	return 0;
-//}
-outfile.close();
 }
-/*
+
 void drawVoronoi()
 {
 	
@@ -656,7 +643,7 @@ void drawVoronoi()
 		glVertex2f( -1+2*(*i)->end->x/w, -1+2*(*i)->end->y/w);
 		glEnd();
 		
-	}*/
+	}
 	//To draw a circle 
 	/*
 	for(int j=0; j<navi; j++){	
@@ -668,7 +655,6 @@ void drawVoronoi()
  		}
  		glEnd();
 	}*/
-	/*
 	glColor3f(0.0, 1.0, 0.3);
 	for(int j=0; j<navi; j++){
 		for(int i=0; i<3;i++){
@@ -679,7 +665,7 @@ void drawVoronoi()
 			glVertex2f( -1+2*(Vertex[j].x/w + Khatam[j][i].x/w) -0.008,  -1+2*(Vertex[j].y/w + Khatam[j][i].y/w) + 0.008);
 			glEnd();
 		}
-	}*/
+	}
 	// The  following segment is to see whether the directions found intersect
 	/*glColor3f(1.0, 0.0, 0.0);
 	for(int j=0; j<navi; j++){
@@ -693,7 +679,6 @@ void drawVoronoi()
 			glEnd();
 		}
 	}*/
-	/*
 	glColor3f(0, 0, 0);
 	
 }
@@ -728,4 +713,4 @@ void reshape (int width, int height)
 	glLoadIdentity(); // Reset the projection matrix to the identity matrix so that we don't get any artifacts (cleaning up)
 	gluPerspective(22.5, (GLfloat)width / (GLfloat)height, 1.0, 100.0); // Set the Field of view angle (in degrees), the aspect ratio of our window, and the new and far planes
 	glMatrixMode(GL_MODELVIEW); // Switch back to the model view matrix, so that we can start drawing shapes correctly
-}*/
+}
