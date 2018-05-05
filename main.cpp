@@ -1,5 +1,5 @@
-//#include <GL/glew.h> // Include the GLEW header file
-//#include <GL/glut.h> // Include the GLUT header file
+#include <GL/glew.h> // Include the GLEW header file
+#include <GL/glut.h> // Include the GLUT header file
 #include <iostream>
 #include <math.h>
 #include <algorithm>
@@ -9,6 +9,7 @@
 #include "VPoint.h"
 #include "Circle.h"
 #include "lines.h"
+
 
 void display (void);
 void onEF (int n);
@@ -20,59 +21,25 @@ vor::Vertices * ver; // vrcholy
 vor::Edges * edg;	 // hrany diagramu
 VPoint Vertex[2000000],tempver[2000000], Khatam[2000000][3];
 polar_point finale[2000000][3];
-double w = 100000;
+double w = 1000;
 unsigned long int navi=0;
 VEdge edges[6000000],edges1[2000000][3];
 VPoint temp[2000000];
 int Ptemp[2000000];
 VEdge edges2[2000000][3];
 double direction[2000000][3];
-int orientation_y(VPoint p1, VPoint p2)
-{
 
-    float val = atan2((p2.y - p1.y),(p2.x - p1.x)) * 180/M_PI;
- 
-    if ((val > 0 && val < 90)||(val < 0 && val > -90)) return 1;  // colinear
-    
-    else if((val > 90 && val <= 180) || (val < -90 && val >= -180)) return -1;
-    
-    else return 0;
-}
 
-int orientation_x(VPoint p1, VPoint p2)
-{
 
-    float val = atan2((p2.y - p1.y),(p2.x - p1.x)) * 180/M_PI;
- 
-    if (val > 0 && val <= 180) return 1;  // colinear
-    
-    else if(val < 0 && val >= -180 ) return -1;
-    
-    else return 0;
-}
-
-float change_domain_180(float a){
-	if(a < 180.0)
-		return (360.0 + a);
-	else 
-		return a;
-}
-float change_domain_90(float a){
-	if(a < 90.0)
-		return (360.0 + a);
-	else 
-		return a;
-}
-//int num_of_vpoints = 100;
+//int num_of_vpoints ;
 int main (int argc, char **argv) 
 {
 	int num_of_vpoints;
 	std::ofstream outfile;
-	outfile.open("time_taken.csv",std::ios::out | std::ios::app);
-	outfile<<"Number_of_VPoints , Number_of_intersections , Initial_Time , Algorithm_Time , Total_Time\n";
-	//std::cin>>num_of_vpoints;
-	//for(num_of_vpoints = 500; num_of_vpoints<=200000; num_of_vpoints+=500){
-	//std::cout<<"num_of_vpoints = "<<num_of_vpoints<<"\n";
+	outfile.open("time_taken(1).csv",std::ios::out | std::ios::app);
+	//outfile<<"Number_of_VPoints , Number_of_intersections , Initial_Time , Algorithm_Time , Total_Time\n";
+	std::cin>>num_of_vpoints;
+	std::cout<<"num_of_vpoints = "<<num_of_vpoints<<"\n";
 	clock_t t1, t2, t3;
 	using namespace vor;
 	VPoint origin(0.0,0.0);
@@ -82,7 +49,7 @@ int main (int argc, char **argv)
 
 	srand ( time(NULL) );
 	// Set max value of i for number of voronoi points
-	for(int i=0; i<=1000000; i++) 
+	for(int i=0; i<=num_of_vpoints; i++) 
 	{
 
 		ver->push_back(new VPoint( w * (double)rand()/(double)RAND_MAX , w * (double)rand()/(double)RAND_MAX )); 
@@ -212,140 +179,57 @@ int main (int argc, char **argv)
 	t2 = clock();
 	std::cout<<"3 point starts\n";
 	for(int w=0;w<navi;w++){
-	//std::ofstream outfile;
-	//outfile.open("file.txt",std::ios::out | std::ios::trunc);
-	bool found = false;
 	//get slopes  for the lines
 	line A(origin, direction[w][0]);					// define the lines
 	line B(origin, direction[w][1]);
 	line C(origin, direction[w][2]);
-	polar_point P, Q;
-	P.r = 10;
-	P.theta = direction[w][0];
-	P.angle_correction();
-	Q.r = 10;
-	Q.theta = direction[w][1];
-	Q.angle_correction();
-	while(found == false)						// start seach loop
-	{
-		polar_point P1 = A.MirrorPoint(P);
-		polar_point P2 = B.MirrorPoint(P);
-		polar_point P12 = C.MirrorPoint(P1);
-		VPoint temp,temp1,temp2,temp12;
-		temp = P.ConvertToCoordinate();
-		temp1 = P1.ConvertToCoordinate();
-		temp2 = P2.ConvertToCoordinate();
-		temp12 = P12.ConvertToCoordinate();
-		//outfile<<"P -> ("<<P.r<<", "<<P.theta<<") P1 -> ("<<P1.r<<", "<<P1.theta<<") P2 -> ("<<P2.r<<", "<<P2.theta<<") P12 -> ("<<P12.r<<", "<<P12.theta<<")"<<std::endl;
-		//KEY AREA//
-		if (P2.theta != P12.theta)			// if P is not the vertex
-		{
-			mirror_Q:
-			polar_point Q1 = A.MirrorPoint(Q);
-			polar_point Q2 = B.MirrorPoint(Q);
-			polar_point Q12 = C.MirrorPoint(Q1);
-			VPoint temp,temp1,temp2,temp12;
-			temp = Q.ConvertToCoordinate();
-			temp1 = Q1.ConvertToCoordinate();
-			temp2 = Q2.ConvertToCoordinate();
-			temp12 = Q12.ConvertToCoordinate();
-			//outfile<<"Q -> ("<<Q.r<<", "<<Q.theta<<") Q1 -> ("<<Q1.r<<", "<<Q1.theta<<") Q2 -> ("<<Q2.r<<", "<<Q2.theta<<") Q12 -> ("<<Q12.r<<", "<<Q12.theta<<")"<<std::endl;
-			//KEY AREA//
-			
-			if((Q2.theta - Q12.theta) != 0.0) 		// if Q is not the vertex
-			{
-				polar_point pq;
-				if((P.theta - Q.theta > 180) || (Q.theta - P.theta > 180))
-					pq.theta = (P.theta + Q.theta)/2 - 180;
-				else
-					pq.theta = (P.theta + Q.theta)/2;
-				if(pq.theta < 0)
-					pq.theta += 360;
-				pq.r = P.r;
-				polar_point pq1 = A.MirrorPoint(pq);
-				polar_point pq2 = B.MirrorPoint(pq);
-				polar_point pq12 = C.MirrorPoint(pq1);
-				//outfile<<"PQ -> ("<<pq.r<<", "<<pq.theta<<") PQ1 -> ("<<pq1.r<<", "<<pq1.theta<<") PQ2 -> ("<<pq2.r<<", "<<pq2.theta<<") PQ12 -> ("<<pq12.r<<", "<<pq12.theta<<")"<<std::endl;
-				
-				if((pq2.theta - pq12.theta < 0.01) && (pq2.theta - pq12.theta > -0.01))
-				{
-					//std::cout<<"negligible difference in 2 & 12"<<std::endl;
-					finale[w][0] = pq;
-					finale[w][1] = pq1;
-					finale[w][2] = pq2;
-					found = true;
-					//outfile.close();
-					break;
-					
-				}
-				
-				if(pq.theta == P.theta || pq.theta == Q.theta){
-					std::cout<<"final point reached"<<std::endl<<Vertex[w].x<<" , "<<Vertex[w].y<<std::endl;
-					//outfile<<"final point reached"<<std::endl;
-					finale[w][0] = P;
-					finale[w][1] = P1;
-					finale[w][2] = P2;
-					//outfile.close();
-					break;
-				}
-				
-				if(orientation_y(Q2.ConvertToCoordinate(),Q12.ConvertToCoordinate()) != orientation_y(P2.ConvertToCoordinate(),P12.ConvertToCoordinate())){
-				if(  orientation_y(pq2.ConvertToCoordinate(),pq12.ConvertToCoordinate()) == orientation_y(P2.ConvertToCoordinate(),P12.ConvertToCoordinate())){
-				// this condition is when the sign of the difference between 2 and 12 for pq is the same as P
-					//outfile<<"case 1"<<std::endl;
-					P.theta = pq.theta;
-				}
-				else if(orientation_y(pq2.ConvertToCoordinate(),pq12.ConvertToCoordinate()) == orientation_y(Q2.ConvertToCoordinate(),Q12.ConvertToCoordinate())){
-				// this condition is when the sign of the difference between 2 and 12 for pq is the same as Q
-					//outfile<<"case 2"<<std::endl;
-					Q.theta = pq.theta;
-				}
-				else{
-					std::cout<<"somethings wrong"<<std::endl;
-					//exit(0);
-				}
-				}
-				else{
-				if(  orientation_x(pq2.ConvertToCoordinate(),pq12.ConvertToCoordinate()) == orientation_x(P2.ConvertToCoordinate(),P12.ConvertToCoordinate())){
-				// this condition is when the sign of the difference between 2 and 12 for pq is the same as P
-					//outfile<<"case 1"<<std::endl;
-					P.theta = pq.theta;
-				}
-				else if(orientation_x(pq2.ConvertToCoordinate(),pq12.ConvertToCoordinate()) == orientation_x(Q2.ConvertToCoordinate(),Q12.ConvertToCoordinate())){
-				// this condition is when the sign of the difference between 2 and 12 for pq is the same as Q
-					//outfile<<"case 2"<<std::endl;
-					Q.theta = pq.theta;
-				}
-				else{
-					std::cout<<"somethings wrong"<<std::endl;
-					//exit(0);
-				}
-				}
-				
-			}
-			else
-				{
-					found = true;
-					finale[w][0] = Q;
-					finale[w][1] = Q1;
-					finale[w][2] = Q2;
-					//outfile.close();
-				}
-		}
-		else
-			{
-				found = true;
-				finale[w][0] = P;
-				finale[w][1] = P1;
-				finale[w][2] = P2;
-				//outfile.close();
-			}
-	}
+	double alpha, beta, gamma;
+	double sorted[3] = {direction[w][0], direction[w][1], direction[w][2]};
+	if (sorted[0] > sorted[1])
+    		std::swap(sorted[0], sorted[1]);
+	if (sorted[0] > sorted[2])
+    		std::swap(sorted[0], sorted[2]);
+	if (sorted[1] > sorted[2])
+    		std::swap(sorted[1], sorted[2]);
+	//ALPHA
+	alpha = 180 - (sorted[2] - sorted[1]);
+	//cout<<alpha<<"\n";
+	
+	//GAMMA
+	gamma = 180 - (sorted[1] - sorted[0]);
+	//cout<<gamma<<"\n";
+	
+	polar_point l,l1,l2;
+	l.r=10;
+	l1.r=10; 
+	l2.r=10;
+	l.theta = sorted[0] - alpha;
+	if(l.theta < 0)
+		l.theta += 360;
+	l1.theta = sorted[0] + alpha;
+	if(l1.theta > 360)
+		l1.theta -= 360;
+	l2.theta = sorted[2] - gamma;
+	if(l2.theta < 0)
+		l2.theta += 360;
+	
+	finale[w][0] = l;
+	finale[w][1] = l1;
+	finale[w][2] = l2;
+	
 	}
 	std::cout<<"ends\n";
 	std::cout<<"4 point starts\n";
 	std::cout<<navi<<std::endl;
+	
+	bool find[200000];
+	//Initializing bool values
+	for(int i=0;i<navi;i++)
+		find[i]=false;
+	//running code
 	for(int i=0;i<navi;i++){
+		if(find[i] == true)
+			continue;
 		bool found = false;
 		for(int j=0;j<navi;j++){
 			if (j==i) continue;
@@ -548,6 +432,7 @@ int main (int argc, char **argv)
 		 		for(int y=0;y<3;y++){
 		 			//std::cout<<"before:"<<finale[i][y].r<<std::endl;
 		 			finale[i][y].r = r;
+		 			find[i] = true;
 		 			//std::cout<<"after:"<<finale[i][y].r<<std::endl;
 		 			//std::cout<<"distance: "<<r<<std::endl;
 		 			//std::cout<<r<<"";
@@ -556,29 +441,12 @@ int main (int argc, char **argv)
 		 		for(int y=0;y<3;y++){
 		 			//std::cout<<"before:"<<finale[i+j][y].r<<std::endl;
 		 			finale[j][y].r = r;
+		 			find[j] = true;
 		 			//std::cout<<"after:"<<finale[i+j][y].r<<std::endl;
 		 			//std::cout<<"distance: "<<r<<std::endl;
 		 			//std::cout<<r<<"\n";
 		 		}
 		 		
-			//This code uses x = r*cos(theta), y = r*sin(theta) to find the intersection
-				/*
-				double cosa,cosb,sina,sinb, r, xs1, xs2, tagnt1, tagnt2;
-				cosa = cos(tempA*(M_PI/180));
-				cosb = cos(tempB*(M_PI/180));
-	 			sina = sin(tempA*(M_PI/180));
-	 			sinb = sin(tempB*(M_PI/180));
-	 			xs1 = Vertex[i].x*sinb;
-	 			xs2 = Vertex[i+j].x*sina;
-	 			tagnt1 = tan(tempA*(M_PI/180));
-	 			tagnt2 = tan(tempB*(M_PI/180));
-	 			r=(Vertex[i+j].y - Vertex[i].y + xs1 - xs2)*(tagnt1/(tagnt1-tagnt2));
-	 			for(int y=0;y<3;y++)
-	 				finale[i][y].r = r;
-	 			r = (Vertex[i].x - Vertex[i+j].x + r*cosa)/cosb;
-	 			for(int y=0;y<3;y++)
-	 				finale[i+j][y].r = r;
-	 			*/
 	 			break;
 	 			
 	 		}
@@ -609,11 +477,12 @@ int main (int argc, char **argv)
 	time1 = time1 / CLOCKS_PER_SEC;
 	time2 = time2 / CLOCKS_PER_SEC;
 	time3 = time3 / CLOCKS_PER_SEC;
-	//std::cout<<"time for intializeng the graph information is: "<<time1<<"\n";
-	//std::cout<<"time for performing the algorithm is: "<<time2<<"\n";
-	//std::cout<<"Overall time taken is: "<<time3<<"\n";
-	outfile<<num_of_vpoints<<" , "<<navi<<" , "<<time1<<" , "<<time2<<" , "<<time3<<"\n";
-	/*glutInit(&argc, argv); // Initialize GLUT
+	//outfile<<num_of_vpoints<<" , "<<navi<<" , "<<time1<<" , "<<time2<<" , "<<time3<<"\n";
+	std::cout<<"time for intializeng the graph information is: "<<time1<<"\n";
+	std::cout<<"time for performing the algorithm is: "<<time2<<"\n";
+	std::cout<<"Overall time taken is: "<<time3<<"\n";
+	
+	glutInit(&argc, argv); // Initialize GLUT
 	glutInitDisplayMode (GLUT_SINGLE); // Set up a basic display buffer (only single buffered for now)
 	glutInitWindowSize (700, 700); // Set the width and height of the window
 	glutInitWindowPosition (100, 100); // Set the position of the window
@@ -629,12 +498,11 @@ int main (int argc, char **argv)
 	//glutKeyboardUpFunc(keyUp); // Tell GLUT to use the method "keyUp" for key up events
 
 	glutMainLoop(); // Enter GLUT's main loop
-	*/
+	
+	outfile.close();
 	return 0;
-//}
-outfile.close();
 }
-/*
+
 void drawVoronoi()
 {
 	
@@ -656,7 +524,7 @@ void drawVoronoi()
 		glVertex2f( -1+2*(*i)->end->x/w, -1+2*(*i)->end->y/w);
 		glEnd();
 		
-	}*/
+	}
 	//To draw a circle 
 	/*
 	for(int j=0; j<navi; j++){	
@@ -668,7 +536,7 @@ void drawVoronoi()
  		}
  		glEnd();
 	}*/
-	/*
+	
 	glColor3f(0.0, 1.0, 0.3);
 	for(int j=0; j<navi; j++){
 		for(int i=0; i<3;i++){
@@ -679,9 +547,9 @@ void drawVoronoi()
 			glVertex2f( -1+2*(Vertex[j].x/w + Khatam[j][i].x/w) -0.008,  -1+2*(Vertex[j].y/w + Khatam[j][i].y/w) + 0.008);
 			glEnd();
 		}
-	}*/
+	}
 	// The  following segment is to see whether the directions found intersect
-	/*glColor3f(1.0, 0.0, 0.0);
+	glColor3f(1.0, 0.0, 0.0);
 	for(int j=0; j<navi; j++){
 		for(int i=0; i<3; i++){
 			polar_point temp = finale[j][i];
@@ -692,8 +560,8 @@ void drawVoronoi()
 			glVertex2f( -1+2*(Vertex[j].x + tEmp.x)/w, -1+2*(Vertex[j].y + tEmp.y)/w);
 			glEnd();
 		}
-	}*/
-	/*
+	}
+	
 	glColor3f(0, 0, 0);
 	
 }
@@ -728,4 +596,4 @@ void reshape (int width, int height)
 	glLoadIdentity(); // Reset the projection matrix to the identity matrix so that we don't get any artifacts (cleaning up)
 	gluPerspective(22.5, (GLfloat)width / (GLfloat)height, 1.0, 100.0); // Set the Field of view angle (in degrees), the aspect ratio of our window, and the new and far planes
 	glMatrixMode(GL_MODELVIEW); // Switch back to the model view matrix, so that we can start drawing shapes correctly
-}*/
+}

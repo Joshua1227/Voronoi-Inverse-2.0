@@ -28,4 +28,6 @@ struct polar_point{  						//  polar coordinates
 
 	void angle_correction();	// A function to correct the angle when it goes above or below 360 degrees
 };
+
+
 #endif
